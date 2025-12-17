@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Advanced Registration Form</title>
+        <style>
+            label, input, textarea{
+                display: block;
+                margin-bottom: 10px;
+            }
+        
+        </style>
+    </head>
+<body>
+    <h2> Registration Form </h2>
+    </body>
+<form>
+    <label for="fullname">Full Name:</label>
+    <input type="text" id="fullname" name="fullname" required>
+
+    <label for="email">Email:</label>
+    <input type="email" id="email" name="email" required>
+
+    <label for="dob">Date of Birth:</label>
+    <input type="date" id="dob" name="dob" required>
+
+    <label for="phone">Phone Number:</label>
+    <input type="tel" id="phone" name="phone" required>
+
+    <label for="pass">Password:</label>
+    <input type="password" id="pass" name="pass" required>
+
+    <label for="profile_pic">Choose Profile Picture:</label>
+    <input type="file" id="profile_pic" name="profile_pic">
+
+    <div>
+        <input type="checkbox" id="terms" name="terms" required>
+        <label for="terms">I accept the Terms & Conditions</label>
+    </div>
+
+    <input type="submit" value="Register">
+</form>
