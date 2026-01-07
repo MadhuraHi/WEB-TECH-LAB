@@ -50,25 +50,25 @@
     </div>
 
     <script>
-        // Select elements
+        
         const video = document.getElementById('vid');
         const audio = document.getElementById('aud');
         const vidLabel = document.getElementById('vidDisplay');
         const audLabel = document.getElementById('audDisplay');
 
-        // Helper function to turn seconds into MM:SS format
+      
         function formatTime(seconds) {
             const min = Math.floor(seconds / 60);
             const sec = Math.floor(seconds % 60);
             return min + ":" + (sec < 10 ? "0" + sec : sec);
         }
 
-        // Update video time display
+        
         video.ontimeupdate = () => {
             vidLabel.innerText = formatTime(video.currentTime);
         };
 
-        // Update audio time display
+        
         audio.ontimeupdate = () => {
             audLabel.innerText = formatTime(audio.currentTime);
         };
@@ -76,3 +76,4 @@
 
 </body>
 </html>
+
