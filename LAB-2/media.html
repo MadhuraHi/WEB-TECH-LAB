@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Advanced Multimedia Page</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; padding: 40px; background-color: #eef2f3; color: #333; }
+        .player-card { 
+            background: white; 
+            max-width: 700px; 
+            margin: 0 auto 30px; 
+            padding: 20px; 
+            border-radius: 15px; 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1); 
+            text-align: center;
+        }
+        h2 { color: #2c3e50; margin-top: 0; }
+        video { width: 100%; border-radius: 10px; border: 1px solid #ddd; }
+        audio { width: 100%; margin-top: 10px; }
+        .timer { 
+            display: inline-block; 
+            margin-top: 10px; 
+            padding: 5px 15px; 
+            background: #34495e; 
+            color: #ecf0f1; 
+            border-radius: 20px; 
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="player-card">
+        <h2>Nature Cinematics</h2>
+        <video id="vid" controls poster="https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=500">
+            <source src="https://www.w3schools.com/html/movie.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+        <div class="timer">Current Time: <span id="vidDisplay">0:00</span></div>
+    </div>
+
+    <div class="player-card">
+        <h2>Ambient Soundscape</h2>
+        <audio id="aud" controls>
+            <source src="https://www.w3schools.com/jsref/horse.mp3" type="audio/mpeg">
+            Your browser does not support the audio tag.
+        </audio>
+        <br>
+        <div class="timer">Playback Position: <span id="audDisplay">0:00</span></div>
+    </div>
+
+    <script>
+        // Select elements
+        const video = document.getElementById('vid');
+        const audio = document.getElementById('aud');
+        const vidLabel = document.getElementById('vidDisplay');
+        const audLabel = document.getElementById('audDisplay');
+
+        // Helper function to turn seconds into MM:SS format
+        function formatTime(seconds) {
+            const min = Math.floor(seconds / 60);
+            const sec = Math.floor(seconds % 60);
+            return min + ":" + (sec < 10 ? "0" + sec : sec);
+        }
+
+        // Update video time display
+        video.ontimeupdate = () => {
+            vidLabel.innerText = formatTime(video.currentTime);
+        };
+
+        // Update audio time display
+        audio.ontimeupdate = () => {
+            audLabel.innerText = formatTime(audio.currentTime);
+        };
+    </script>
+
+</body>
+</html>
