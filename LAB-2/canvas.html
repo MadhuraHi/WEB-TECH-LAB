@@ -1,0 +1,39 @@
+    <!DOCTYPE html>
+    <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <title>MY CANVAS</title>
+            <style>
+                canvas{
+                    border:2px solid #333;
+                    background-color: #f4ef93;
+                    display:block;
+                    margin: 20px auto;
+                }
+            </style>
+        </head>
+        <body>
+            <canvas id="mycanvas" width="500" height="300" style="border: 2px solid black;"></canvas>
+            <script>
+                const canvas=document.getElementById('mycanvas');
+                const ctx=canvas.getContext('2d');
+                ctx.fillStyle="blue";
+                ctx.fillRect(20 , 20 ,460, 180 );
+
+                ctx.beginPath();
+                ctx.fillStyle= "yellow";
+                ctx.arc(300,90,40,0,Math.PI*2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.strokeStyle="black";
+                ctx.lineWidth=5;
+                ctx.moveTo(80,150);
+                ctx.lineTo(250, 50);
+                ctx.stroke();
+                ctx.fillStyle="black";
+                ctx.font="bold 30px Luxe ";
+                ctx.fillText("HTML5 CANVAS", 180, 260);
+
+            </script>
+        </body>
+    </html>
