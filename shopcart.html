@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Intelligent Shopping Cart (INR)</title>
+    <style>
+        :root {
+            --cart-green: #1b5e20;
+            --light-bg: #f1f8e9;
+            --border-color: #c5e1a5;
+        }
+
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; padding: 20px; display: flex; justify-content: center; }
+        .cart-container { background: white; width: 100%; max-width: 800px; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        
+        h2 { border-bottom: 3px solid var(--cart-green); padding-bottom: 10px; color: #1b5e20; }
+
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background: var(--light-bg); color: var(--cart-green); }
+
+        .qty-btn { padding: 5px 10px; cursor: pointer; border: 1px solid #ccc; background: white; border-radius: 4px; font-weight: bold; }
+        .remove-btn { color: #d32f2f; cursor: pointer; font-weight: bold; border: none; background: none; }
+
+        .summary-box { background: var(--light-bg); padding: 20px; border-radius: 8px; border: 1px solid var(--border-color); }
+        .discount-info { font-size: 0.9rem; color: #33691e; font-style: italic; margin-bottom: 10px; font-weight: 500; }
+        .total-row { font-size: 1.4rem; font-weight: bold; display: flex; justify-content: space-between; color: #1b5e20; }
+        
+        .coupon-section { margin-top: 15px; }
+        input[type="text"] { padding: 10px; border: 2px solid #ccc; border-radius: 4px; outline: none; }
+        input[type="text"]:focus { border-color: var(--cart-green); }
+        .apply-btn { padding: 10px 15px; background: var(--cart-green); color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="cart-container">
+    <h2>Smart Shopping Cart (India) 🛒</h2>
+    
+    <table id="cartTable">
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Price</th>
+                <th>Quantity</th>
+                <th>Subtotal</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="cartItems"></tbody>
+    </table>
+
+    <div class="summary-box">
+        <div class="discount-info" id="discountNotice">Calculating discounts...</div>
+        <div class="coupon-section">
+            <input type="text" id="couponInput" placeholder="Try 'SAVE20'">
+            <button class="apply-btn" onclick="applyCoupon()">Apply Coupon</button>
+        </div>
+        <hr style="border: 0.5px solid var(--border-color); margin: 20px 0;">
+        <div class="total-row">
+            <span>Total Amount:</span>
+            <span id="finalTotal">₹0</span>
+        </div>
+    </div>
+</div>
+
+<script>
+    
+    let cart = [
+        { id: 1, name: "Noise-Cancelling Headphones", price: 8500, qty: 1, category: "Electronics" },
+        { id: 2, name: "Organic Basmati Rice (5kg)", price: 750, qty: 2, category: "Groceries" },
+        { id: 3, name: "Wireless Mouse", price: 1200, qty: 1, category: "Electronics" }
+    ];
+
+    let couponDiscount = 0;
+
+    function renderCart() {
+        const tbody = document.getElementById('cartItems');
+        tbody.innerHTML = '';
+        
+        let subtotal = 0;
+
+        cart.forEach((item, index) => {
+            const itemTotal = item.price * item.qty;
+            subtotal += itemTotal;
+
+            tbody.innerHTML += `
+                <tr>
+                    <td><strong>${item.name}</strong><br><small>${item.category}</small></td>
+                    <td>₹${item.price.toLocaleString('en-IN')}</td>
+                    <td>
+                        <button class="qty-btn" onclick="updateQty(${index}, -1)">-</button>
+                        <span style="margin: 0 10px">${item.qty}</span>
+                        <button class="qty-btn" onclick="updateQty(${index}, 1)">+</button>
+                    </td>
+                    <td>₹${itemTotal.toLocaleString('en-IN')}</td>
+                    <td><button class="remove-btn" onclick="removeItem(${index})">Remove</button></td>
+                </tr>
+            `;
+        });
+
+        calculateFinal(subtotal);
+    }
+
+    function updateQty(index, change) {
+        if (cart[index].qty + change > 0) {
+            cart[index].qty += change;
+            renderCart();
+        }
+    }
+
+    function removeItem(index) {
+        cart.splice(index, 1);
+        renderCart();
+    }
+
+    function calculateFinal(subtotal) {
+        let savings = 0;
+        let messages = [];
+
+        const totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
+        if (totalItems >= 5) {
+            let bulkSaving = subtotal * 0.10; 
+            savings += bulkSaving;
+            messages.push("Bulk Order (10% Off)");
+        }
+
+        const electronicsTotal = cart
+            .filter(i => i.category === "Electronics")
+            .reduce((sum, i) => sum + (i.price * i.qty), 0);
+        
+        if (electronicsTotal > 10000) {
+            savings += 1000;
+            messages.push("Premium Electronics Discount (₹1,000 Off)");
+        }
+
+        const hour = new Date().getHours();
+        if (hour >= 16 && hour <= 18) {
+            savings += subtotal * 0.05;
+            messages.push("Evening Special (5% Off)");
+        }
+
+        if (couponDiscount > 0) {
+            savings += subtotal * (couponDiscount / 100);
+            messages.push(`Coupon: SAVE${couponDiscount} Applied`);
+        }
+
+        const final = subtotal - savings;
+        
+        document.getElementById('finalTotal').innerText = `₹${Math.round(final).toLocaleString('en-IN')}`;
+        document.getElementById('discountNotice').innerText = messages.length > 0 
+            ? "Offers: " + messages.join(" | ") 
+            : "Add more items for discounts!";
+    }
+
+    function applyCoupon() {
+        const input = document.getElementById('couponInput').value.trim().toUpperCase();
+        
+        if (input.startsWith("SAVE") && input.length >= 5) {
+            const digitPart = input.substring(4); 
+            if (!isNaN(digitPart) && digitPart !== "") {
+                couponDiscount = parseInt(digitPart);
+                alert("Coupon Applied: " + couponDiscount + "% discount added!");
+            } else {
+                alert("Invalid Coupon Format.");
+            }
+        } else {
+            alert("Use code SAVE10, SAVE20, etc.");
+            couponDiscount = 0;
+        }
+        renderCart();
+    }
+
+    renderCart();
+</script>
+
+</body>
+</html>

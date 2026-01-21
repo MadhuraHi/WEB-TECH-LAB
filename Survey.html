@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dynamic Survey Builder | Professional Green</title>
+    <style>
+        :root {
+            --mint-green: #27ae60;
+            --sage-bg: #f0f7f2;
+            --deep-green: #1e8449;
+            --error-red: #e74c3c;
+            --glass-white: rgba(255, 255, 255, 0.95);
+        }
+
+        body { 
+            font-family: 'Segoe UI', system-ui, sans-serif; 
+            background: var(--sage-bg); 
+            margin: 0; padding: 40px 20px; 
+            display: flex; justify-content: center;
+        }
+
+        .survey-card { 
+            background: var(--glass-white); 
+            width: 100%; max-width: 650px; 
+            padding: 40px; border-radius: 24px; 
+            box-shadow: 0 20px 40px rgba(39, 174, 96, 0.1);
+            border: 1px solid rgba(39, 174, 96, 0.1);
+        }
+
+        h2 { 
+            color: var(--deep-green); 
+            text-align: center; font-size: 28px; 
+            margin-bottom: 30px; letter-spacing: -0.5px;
+        }
+
+        .question-block { 
+            background: #ffffff;
+            margin-bottom: 20px; padding: 25px; 
+            border-radius: 16px; border: 2px solid transparent;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+        }
+
+        .question-block:hover {
+            border-color: #d4efdf;
+            transform: translateY(-2px);
+        }
+
+        .question-label { 
+            font-weight: 700; display: block; 
+            margin-bottom: 12px; color: #2c3e50; font-size: 16px;
+        }
+
+        input[type="text"], textarea { 
+            width: 100%; padding: 12px 16px; 
+            border: 2px solid #e0e0e0; border-radius: 10px; 
+            box-sizing: border-box; outline: none; transition: 0.3s;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--mint-green);
+            background: #fafffb;
+        }
+
+        .option-group { display: flex; flex-direction: column; gap: 12px; }
+        
+        .option-item {
+            display: flex; align-items: center; gap: 10px;
+            cursor: pointer; padding: 8px; border-radius: 8px;
+            transition: background 0.2s;
+        }
+        .option-item:hover { background: #f1f8f4; }
+        
+        .error-msg { 
+            color: var(--error-red); font-size: 13px; 
+            margin-top: 8px; display: none; font-weight: 500;
+        }
+
+        .invalid { border-color: var(--error-red) !important; background-color: #fffafa !important; }
+
+        button#submitBtn { 
+            width: 100%; padding: 18px; 
+            background: var(--mint-green); color: white; 
+            border: none; border-radius: 12px; 
+            font-weight: 700; cursor: pointer; font-size: 18px; 
+            transition: all 0.3s ease; margin-top: 10px;
+        }
+
+        button#submitBtn:hover { 
+            background: var(--deep-green); 
+            box-shadow: 0 10px 20px rgba(39, 174, 96, 0.3);
+        }
+    </style>
+</head>
+<body>
+
+<div class="survey-card">
+    <h2>Academic Survey 📝</h2>
+    <form id="surveyForm" novalidate>
+        <div id="surveyContainer">
+            </div>
+        <button type="submit" id="submitBtn">Complete Survey</button>
+    </form>
+</div>
+
+<script>
+  
+    const surveyData = [
+        {
+            id: "q1",
+            type: "text",
+            label: "What is your primary area of study?",
+            required: true,
+            minLength: 4
+        },
+        {
+            id: "q2",
+            type: "radio",
+            label: "Rate your satisfaction with the resources provided:",
+            options: ["Very Satisfied", "Neutral", "Unsatisfied"],
+            required: true
+        },
+        {
+            id: "q3",
+            type: "checkbox",
+            label: "Which lab tools have you utilized? (Pick 2+)",
+            options: ["Git/GitHub", "Canvas API", "LocalStorage", "Multimedia API"],
+            minSelect: 2
+        },
+        {
+            id: "q4",
+            type: "text",
+            label: "Briefly explain your final project goal (Max 60 chars)",
+            maxLength: 60
+        }
+    ];
+
+    const container = document.getElementById('surveyContainer');
+
+    function buildSurvey() {
+        surveyData.forEach(q => {
+            const block = document.createElement('div');
+            block.className = 'question-block';
+            block.id = `block-${q.id}`;
+
+            const label = document.createElement('label');
+            label.className = 'question-label';
+            label.innerText = q.label + (q.required || q.minSelect ? " *" : "");
+            block.appendChild(label);
+
+            if (q.type === 'text') {
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.id = q.id;
+                input.placeholder = "Enter your response...";
+                block.appendChild(input);
+            } 
+            else if (q.type === 'radio' || q.type === 'checkbox') {
+                const optionGroup = document.createElement('div');
+                optionGroup.className = 'option-group';
+                
+                q.options.forEach(opt => {
+                    const wrapper = document.createElement('label');
+                    wrapper.className = 'option-item';
+                    wrapper.innerHTML = `
+                        <input type="${q.type}" name="${q.id}" value="${opt}" style="accent-color: var(--mint-green); width: 18px; height: 18px;"> 
+                        <span>${opt}</span>
+                    `;
+                    optionGroup.appendChild(wrapper);
+                });
+                block.appendChild(optionGroup);
+            }
+
+            const error = document.createElement('div');
+            error.className = 'error-msg';
+            error.id = `error-${q.id}`;
+            block.appendChild(error);
+
+            container.appendChild(block);
+        });
+    }
+
+    function validateSurvey() {
+        let isFormValid = true;
+
+        surveyData.forEach(q => {
+            const errorDiv = document.getElementById(`error-${q.id}`);
+            let isValid = true;
+            let message = "";
+
+            if (q.type === 'text') {
+                const input = document.getElementById(q.id);
+                const val = input.value.trim();
+                
+                if (q.required && val === "") {
+                    isValid = false;
+                    message = "Please complete this question.";
+                } else if (q.minLength && val.length < q.minLength) {
+                    isValid = false;
+                    message = `Response is too short (min ${q.minLength} characters).`;
+                } else if (q.maxLength && val.length > q.maxLength) {
+                    isValid = false;
+                    message = `Response is too long (max ${q.maxLength} characters).`;
+                }
+                input.classList.toggle('invalid', !isValid);
+            } 
+            else if (q.type === 'radio') {
+                const checked = document.querySelector(`input[name="${q.id}"]:checked`);
+                if (q.required && !checked) {
+                    isValid = false;
+                    message = "Please select one option.";
+                }
+            }
+            else if (q.type === 'checkbox') {
+                const checkedCount = document.querySelectorAll(`input[name="${q.id}"]:checked`).length;
+                if (q.minSelect && checkedCount < q.minSelect) {
+                    isValid = false;
+                    message = `Selection required: Please pick at least ${q.minSelect} tools.`;
+                }
+            }
+
+            if (!isValid) {
+                errorDiv.innerText = message;
+                errorDiv.style.display = 'block';
+                isFormValid = false;
+            } else {
+                errorDiv.style.display = 'none';
+            }
+        });
+
+        return isFormValid;
+    }
+
+    document.getElementById('surveyForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        if (validateSurvey()) {
+            alert("Success! Your survey has been recorded.");
+        }
+    });
+
+    buildSurvey();
+</script>
+
+</body>
+</html>

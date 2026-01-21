@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Adaptive Registration System</title>
+    <style>
+        :root {
+            --accent-green: #27ae60;
+            --soft-green: #e8f5e9;
+            --error-red: #e74c3c;
+            --dark-gray: #2c3e50;
+        }
+
+        body { 
+            font-family: 'Segoe UI', Arial, sans-serif; 
+            background-color: #f4f4f4; 
+            display: flex; justify-content: center; padding: 40px; 
+        }
+
+        .registration-card { 
+            background: white; padding: 30px; border-radius: 8px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
+            width: 100%; max-width: 500px; border-top: 5px solid var(--accent-green);
+        }
+
+        h2 { color: var(--dark-gray); margin-bottom: 20px; text-align: center; }
+
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 14px; }
+        
+        input, select { 
+            width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; 
+            box-sizing: border-box; transition: 0.3s;
+        }
+
+        .input-invalid { border-color: var(--error-red); background-color: #fff6f6; }
+        .input-valid { border-color: var(--accent-green); }
+        
+        .feedback { font-size: 12px; margin-top: 4px; min-height: 15px; }
+        .error-text { color: var(--error-red); }
+        .valid-text { color: var(--accent-green); }
+
+        .strength-container { height: 5px; width: 100%; background: #eee; margin-top: 8px; border-radius: 2px; display: none; }
+        #strengthBar { height: 100%; width: 0%; transition: 0.4s; border-radius: 2px; }
+
+        button { 
+            width: 100%; padding: 12px; background: var(--accent-green); color: white; 
+            border: none; border-radius: 4px; font-weight: bold; cursor: pointer; margin-top: 10px;
+        }
+        button:hover { background: #219150; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="registration-card">
+    <h2>User Registration</h2>
+    <form id="registrationForm" novalidate>
+        <div class="form-group">
+            <label>Full Name</label>
+            <input type="text" id="name" required>
+            <div id="nameFeedback" class="feedback"></div>
+        </div>
+
+        <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="email" required>
+            <div id="emailFeedback" class="feedback"></div>
+        </div>
+
+        <div class="form-group">
+            <label>User Role</label>
+            <select id="role">
+                <option value="Student">Student</option>
+                <option value="Teacher">Teacher</option>
+                <option value="Admin">Admin</option>
+            </select>
+        </div>
+
+        <div class="form-group" id="skillsGroup">
+            <label>Skills</label>
+            <input type="text" id="skills">
+        </div>
+
+        <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="password" required>
+            <div class="strength-container" id="strengthContainer">
+                <div id="strengthBar"></div>
+            </div>
+            <div id="passFeedback" class="feedback"></div>
+        </div>
+
+        <div class="form-group">
+            <label>Confirm Password</label>
+            <input type="password" id="confirmPassword" required>
+            <div id="confirmFeedback" class="feedback"></div>
+        </div>
+
+        <div class="form-group">
+            <label>Age</label>
+            <input type="number" id="age" required>
+            <div id="ageFeedback" class="feedback"></div>
+        </div>
+
+        <button type="submit">Register User</button>
+    </form>
+</div>
+
+<script>
+    const form = document.getElementById('registrationForm');
+    const roleSelect = document.getElementById('role');
+    const skillsGroup = document.getElementById('skillsGroup');
+    const strengthBar = document.getElementById('strengthBar');
+    const strengthContainer = document.getElementById('strengthContainer');
+
+    roleSelect.addEventListener('change', () => {
+        
+        if (roleSelect.value === 'Admin') {
+            skillsGroup.classList.add('hidden');
+        } else {
+            skillsGroup.classList.remove('hidden');
+        }
+        validate(); 
+    });
+
+    function checkStrength(p) {
+        strengthContainer.style.display = 'block';
+        let strength = 0;
+        if (p.length >= 6) strength += 25;
+        if (p.length >= 8) strength += 25;
+        if (/[0-9]/.test(p)) strength += 25;
+        if (/[!@#$%^&*]/.test(p)) strength += 25;
+
+        strengthBar.style.width = strength + '%';
+        if (strength < 50) strengthBar.style.backgroundColor = '#e74c3c';
+        else if (strength < 100) strengthBar.style.backgroundColor = '#f1c40f';
+        else strengthBar.style.backgroundColor = '#27ae60';
+        
+        return strength;
+    }
+
+    function validate() {
+        let isValid = true;
+        const role = roleSelect.value;
+
+        const email = document.getElementById('email');
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const isEmailOk = emailRegex.test(email.value);
+        updateUI(email, 'emailFeedback', isEmailOk, "Invalid email format");
+
+        const pass = document.getElementById('password');
+        const pVal = pass.value;
+        const strength = checkStrength(pVal);
+        let isPassOk = false;
+        let passMsg = "";
+
+        if (role === 'Student') {
+            isPassOk = pVal.length >= 6;
+            passMsg = "Student: Min 6 characters";
+        } else if (role === 'Teacher') {
+            isPassOk = pVal.length >= 8;
+            passMsg = "Teacher: Min 8 characters";
+        } else if (role === 'Admin') {
+            isPassOk = pVal.length >= 8 && /[0-9]/.test(pVal) && /[!@#$%^&*]/.test(pVal);
+            passMsg = "Admin: 8+ chars, 1 number, 1 special character";
+        }
+        updateUI(pass, 'passFeedback', isPassOk, passMsg);
+
+        const confirm = document.getElementById('confirmPassword');
+        const isMatch = (confirm.value === pass.value && confirm.value !== "");
+        updateUI(confirm, 'confirmFeedback', isMatch, "Passwords do not match");
+
+        const name = document.getElementById('name');
+        updateUI(name, 'nameFeedback', name.value.trim().length >= 2, "Name required");
+
+        const age = document.getElementById('age');
+        updateUI(age, 'ageFeedback', age.value > 0, "Enter valid age");
+
+        return document.querySelectorAll('.input-invalid').length === 0;
+    }
+
+    function updateUI(el, feedbackId, valid, message) {
+        const fb = document.getElementById(feedbackId);
+        if (valid) {
+            el.className = 'input-valid';
+            fb.innerText = "Verified";
+            fb.className = "feedback valid-text";
+        } else {
+            el.className = 'input-invalid';
+            fb.innerText = message;
+            fb.className = "feedback error-text";
+        }
+    }
+
+    form.addEventListener('input', validate);
+
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        if (validate()) {
+            alert("Success! Registration complete for " + roleSelect.value);
+        } else {
+            alert("Please fix validation errors.");
+        }
+    });
+</script>
+
+</body>
+</html>
